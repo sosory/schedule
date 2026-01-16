@@ -2,9 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>일정 캘린더</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <title>캘린더</title>
   <style>
     html, body {
       margin: 0;
@@ -12,16 +10,50 @@
       height: 100%;
     }
 
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .top {
+      flex: 8;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .bottom {
+      flex: 2;
+      padding: 12px;
+      box-sizing: border-box;
+      background: #fafafa;
+      overflow-y: auto;
+    }
+
     iframe {
       width: 100%;
       height: 100%;
-      border: none;
+      border: 0;
     }
   </style>
 </head>
 <body>
-
-<iframe src="https://calendar.google.com/calendar/embed?src=5e111dea0abd7d8b02331e8c1bd70c25476c7f985a56d4931cb295d1ec7da8ac%40group.calendar.google.com&ctz=Asia%2FSeoul" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
-
+  <div class="container">
+    <!-- 위 80%: 캘린더 -->
+    <div class="top">
+      <iframe
+        <iframe src="https://calendar.google.com/calendar/embed?src=5e111dea0abd7d8b02331e8c1bd70c25476c7f985a56d4931cb295d1ec7da8ac%40group.calendar.google.com&ctz=Asia%2FSeoul" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+      </iframe>
+    </div>
+ q
+    <!-- 아래 20%: 기타 영역 -->
+    <div class="bottom">
+      <h3>공지</h3>
+      <ul>
+        <li>📌 일정 클릭 후 설명에서 자료 링크 확인</li>
+        <li>📊 관련 스프레드시트는 이벤트 설명에 포함</li>
+        <li>🔗 참고 링크 모음</li>
+      </ul>
+    </div>
+  </div>
 </body>
 </html>
