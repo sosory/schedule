@@ -2,138 +2,28 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <title>일정 캘린더</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>레벨별 쌀 & 토벌 계산기</title>
+
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .container { display: flex; gap: 40px; align-items: flex-start; }
-    .card { border: 1px solid #eee; padding: 16px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-    .levels { display: grid; grid-template-columns: 1fr; gap: 8px; }
-    .level-row { display:flex; align-items:center; gap:8px; }
-    .level-row label { width:70px; }
-    .level-row input[type="number"] { width:90px; padding:6px; }
-    .muted { color:#555; margin-left:6px; font-size:0.95em; }
-    .smallText { font-size:0.8em; color:#555; margin-left:4px; }
-    button { padding: 10px 18px; margin-top: 16px; cursor: pointer; }
-    #result { margin-top: 16px; font-size: 1.1em; font-weight: bold; }
-    .header { font-weight:bold; margin-bottom:10px; }
-    #timeRemaining { font-weight: bold; margin-bottom: 12px; color: #d33; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
-  <h2>레벨별 쌀 생산 + 반란군 토벌 계산기</h2>
 
-  <div>
-    <label for="endDate">종료 날짜 및 시간 선택: </label>
-    <input type="datetime-local" id="endDate" />
-  </div>
+  <iframe
+    src="여기에_구글_캘린더_embed_URL">
+  </iframe>
 
-  <div id="timeRemaining">남은 시간: </div>
-
-  <div class="container">
-    <div class="card" style="width:360px;">
-      <div class="header">쌀 생산 (입력: 개수)</div>
-      <div id="riceBox" class="levels"></div>
-    </div>
-
-    <div class="card" style="width:360px;">
-      <div class="header">반란군 토벌 (입력: 횟수) + 남은 일수 곱하기</div>
-      <div id="rebelBox" class="levels"></div>
-    </div>
-  </div>
-
-  <button onclick="calculate()">총 생산량 계산</button>
-  <div id="result"></div>
-
-  <script>
-    const rates = {1:30,2:35,3:40,4:45,5:50,6:55,7:60,8:65,9:80,10:100};
-    const rebel = {1:10000,2:40000,3:90000,4:160000,5:250000,6:360000,7:490000,8:640000,9:810000,10:1000000};
-
-    const riceBox = document.getElementById('riceBox');
-    const rebelBox = document.getElementById('rebelBox');
-
-    for (let level=1; level<=10; level++){
-      const rRow = document.createElement('div');
-      rRow.className = 'level-row';
-      rRow.innerHTML = `
-        <label>레벨 ${level}</label>
-        <input id="lvl${level}" type="number" min="0" value="0" />
-        <span class="muted">(1분당 ${rates[level]}개)</span>
-      `;
-      riceBox.appendChild(rRow);
-
-      const bRow = document.createElement('div');
-      bRow.className = 'level-row';
-      bRow.innerHTML = `
-        <label>레벨 ${level}</label>
-        <input id="rb${level}" type="number" min="0" value="0" />
-        <input id="rbMulti${level}" type="checkbox" title="남은 일수 곱하기" style="margin-left:6px;" />
-        <span class="smallText">남은일수 곱하기</span>
-        <span class="muted">(+${rebel[level].toLocaleString()}개)</span>
-      `;
-      rebelBox.appendChild(bRow);
-    }
-
-    function getRemainingSeconds() {
-      const now = new Date();
-      const endInput = document.getElementById('endDate').value;
-      let end;
-      if (endInput) {
-        end = new Date(endInput);
-      } else {
-        end = new Date(now);
-        end.setHours(19, 0, 0, 0);
-        const day = now.getDay();
-        let diffDays = (7 - day) % 7;
-        if (diffDays === 0 && now.getTime() > end.getTime()) diffDays = 7;
-        end.setDate(now.getDate() + diffDays);
-      }
-      return Math.max(0, Math.floor((end - now) / 1000));
-    }
-
-    function getRemainingDays() {
-      return Math.ceil(getRemainingSeconds() / 86400);
-    }
-
-    function formatTime(seconds){
-      const days = Math.floor(seconds / 86400);
-      const h = Math.floor((seconds % 86400) / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      return `${days}일 ${h}시간 ${m}분 ${s}초`;
-    }
-
-    function updateTimeRemaining(){
-      const remainingSec = getRemainingSeconds();
-      document.getElementById('timeRemaining').textContent = `남은 시간: ${formatTime(remainingSec)}`;
-    }
-
-    setInterval(updateTimeRemaining, 1000);
-    updateTimeRemaining();
-
-    function calculate(){
-      const remainingMinutes = Math.ceil(getRemainingSeconds()/60);
-      const remainingDays = getRemainingDays();
-      let totalRice = 0;
-      let totalRebel = 0;
-
-      for (let level=1; level<=10; level++){
-        const riceCount = Number(document.getElementById(`lvl${level}`).value) || 0;
-        totalRice += riceCount * rates[level] * remainingMinutes;
-
-        let rbCount = Number(document.getElementById(`rb${level}`).value) || 0;
-        const multiply = document.getElementById(`rbMulti${level}`).checked;
-        if (multiply) rbCount *= remainingDays;
-        totalRebel += rbCount * rebel[level];
-      }
-
-      const total = totalRice + totalRebel;
-      document.getElementById('result').innerHTML = `
-        쌀 생산: <strong>${totalRice.toLocaleString()}</strong>개<br>
-        반란군 토벌: <strong>${totalRebel.toLocaleString()}</strong>개<br><hr>
-        총 생산량: <strong>${total.toLocaleString()}</strong>개
-      `;
-    }
-  </script>
 </body>
 </html>
